@@ -1,102 +1,102 @@
 # Gallery Security Selectors
 
-یک پنل مدیریتی ساده برای ذخیره و مدیریت CSS Selector های مختلف سایت‌ها، ساخته شده با React و Cloudflare Pages + Workers KV.
+A simple admin panel for storing and managing CSS selectors for various sites, built with React and Cloudflare Pages + Workers KV.
 
-## ویژگی‌ها
+## Features
 
-- ✨ رابط کاربری ساده و فارسی
-- 🗂️ ذخیره‌سازی در Cloudflare Workers KV
-- 📋 کپی سریع Selector ها با کلیک روی سلول‌ها
-- ➕ افزودن سریع سایت جدید از طریق فرم textarea
-- 🗑️ حذف آسان سایت‌ها
-- 📱 طراحی Responsive
+- ✨ Simple and intuitive UI
+- 🗂️ Persistent storage in Cloudflare Workers KV
+- 📋 Quick copy selectors with one click
+- ➕ Fast site addition via textarea form
+- 🗑️ Easy site deletion
+- 📱 Responsive design
 
-## ساختار پروژه
+## Project Structure
 
 ```
 .
 ├── src/
-│   ├── App.jsx          # کامپوننت اصلی
-│   ├── App.css          # استایل‌های UI
+│   ├── App.jsx          # Main component
+│   ├── App.css          # UI styles
 │   ├── main.jsx         # Entry point
-│   └── index.css        # استایل‌های عمومی
+│   └── index.css        # Global styles
 ├── functions/
 │   └── api/
-│       └── sites.js     # API endpoints برای KV
+│       └── sites.js     # API endpoints for KV
 ├── index.html
 ├── vite.config.js
 └── package.json
 ```
 
-## نصب و راه‌اندازی محلی
+## Local Installation and Development
 
-### پیش‌نیازها
+### Prerequisites
 
-- Node.js (نسخه 18 یا بالاتر)
-- npm یا yarn
-- حساب کاربری Cloudflare
+- Node.js (version 18 or higher)
+- npm or yarn
+- Cloudflare account
 
-### مراحل نصب
+### Installation Steps
 
-1. کلون کردن ریپو:
+1. Clone the repository:
 
 ```bash
 git clone https://github.com/ali934h/Gallery-Security-Selectors.git
 cd Gallery-Security-Selectors
 ```
 
-2. نصب وابستگی‌ها:
+2. Install dependencies:
 
 ```bash
 npm install
 ```
 
-3. اجرای پروژه در محیط توسعه:
+3. Run the project in development mode:
 
 ```bash
 npm run dev
 ```
 
-## دیپلوی روی Cloudflare Pages
+## Deploying to Cloudflare Pages
 
-### مرحله 1: ساخت KV Namespace
+### Step 1: Create KV Namespace
 
-1. وارد داشبورد Cloudflare شوید
-2. به بخش **Workers & Pages** بروید
-3. روی تب **KV** کلیک کنید
-4. یک namespace جدید با نام `Gallery-Security-Selectors` بسازید
+1. Go to Cloudflare Dashboard
+2. Navigate to **Workers & Pages**
+3. Click on the **KV** tab
+4. Create a new namespace named `Gallery-Security-Selectors`
 
-### مرحله 2: اتصال ریپو به Cloudflare Pages
+### Step 2: Connect Repository to Cloudflare Pages
 
-1. در داشبورد Cloudflare به **Workers & Pages** بروید
-2. روی **Create application** کلیک کنید
-3. تب **Pages** را انتخاب کنید
-4. **Connect to Git** را انتخاب کنید
-5. ریپوی `Gallery-Security-Selectors` را انتخاب کنید
-6. تنظیمات Build را به شکل زیر وارد کنید:
+1. In Cloudflare Dashboard, go to **Workers & Pages**
+2. Click **Create application**
+3. Select the **Pages** tab
+4. Click **Connect to Git**
+5. Select the `Gallery-Security-Selectors` repository
+6. Configure build settings as follows:
 
    - **Framework preset**: `Vite`
    - **Build command**: `npm run build`
    - **Build output directory**: `dist`
 
-7. روی **Save and Deploy** کلیک کنید
+7. Click **Save and Deploy**
 
-### مرحله 3: اتصال KV Namespace
+### Step 3: Bind KV Namespace
 
-1. بعد از دیپلوی اولیه، به **Settings** پروژه بروید
-2. به بخش **Functions** بروید
-3. در قسمت **KV namespace bindings** روی **Add binding** کلیک کنید
-4. تنظیمات زیر را وارد کنید:
+1. After the first deployment, go to project **Settings**
+2. Navigate to **Functions** section
+3. In **KV namespace bindings**, click **Add binding**
+4. Enter the following settings:
    - **Variable name**: `GALLERY_SECURITY_SELECTORS`
-   - **KV namespace**: namespace ای که در مرحله 1 ساختید را انتخاب کنید
-5. روی **Save** کلیک کنید
-6. یک **Redeploy** انجام دهید تا تغییرات اعمال شود
+   - **KV namespace**: Select the namespace you created in Step 1
+5. Click **Save**
+6. Perform a **Redeploy** to apply the changes
 
-## نحوه استفاده
+## How to Use
 
-### افزودن سایت جدید
+### Adding a New Site
 
-1. در textarea چهار خط به ترتیب زیر وارد کنید:
+1. Enter 4 lines in the textarea in the following order:
    ```
    example.com
    div.card-selector
@@ -104,28 +104,28 @@ npm run dev
    div.container-selector
    ```
 
-2. روی دکمه **افزودن سایت** کلیک کنید
+2. Click the **Add Site** button
 
-3. سایت به جدول اضافه می‌شود
+3. The site will be added to the table
 
-### کپی کردن Selector ها
+### Copying Selectors
 
-- روی هر سلول در جدول کلیک کنید تا مقدار آن به کلیپ‌بورد کپی شود
-- یک toast notification نمایش داده می‌شود
+- Click on any cell in the table to copy its value to clipboard
+- A toast notification will appear
 
-### حذف سایت
+### Deleting a Site
 
-- روی دکمه **حذف** بالای هر ستون کلیک کنید
-- یک تاییدیه نمایش داده می‌شود
-- بعد از تایید، سایت از KV حذف می‌شود
+- Click the **Delete** button at the top of each column
+- A confirmation dialog will appear
+- After confirmation, the site will be removed from KV
 
-## ساختار داده در KV
+## Data Structure in KV
 
-هر سایت به صورت یک key-value در KV ذخیره می‌شود:
+Each site is stored as a key-value pair in KV:
 
-**Key**: نام دامنه سایت (مثلا `example.com`)
+**Key**: Site domain name (e.g., `example.com`)
 
-**Value**: JSON به شکل زیر
+**Value**: JSON in the following format
 
 ```json
 {
@@ -136,26 +136,26 @@ npm run dev
 }
 ```
 
-## تکنولوژی‌های استفاده شده
+## Technologies Used
 
-- **React 18** - کتابخانه UI
+- **React 18** - UI library
 - **Vite** - Build tool
-- **Cloudflare Pages** - هاستینگ و دیپلوی
-- **Cloudflare Workers KV** - دیتابیس key-value
+- **Cloudflare Pages** - Hosting and deployment
+- **Cloudflare Workers KV** - Key-value database
 - **Pages Functions** - Serverless API
 
-## توسعه بیشتر
+## Further Development
 
-برای افزودن قابلیت‌های جدید:
+To add new features:
 
-1. تغییرات UI در `src/App.jsx` و `src/App.css`
-2. تغییرات API در `functions/api/sites.js`
-3. برای افزودن فیلدهای جدید، ساختار JSON در KV را تغییر دهید
+1. UI changes in `src/App.jsx` and `src/App.css`
+2. API changes in `functions/api/sites.js`
+3. To add new fields, modify the JSON structure in KV
 
-## لایسنس
+## License
 
 MIT
 
-## سازنده
+## Author
 
 [@ali934h](https://github.com/ali934h)
