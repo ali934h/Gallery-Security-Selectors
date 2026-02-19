@@ -6,6 +6,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [bulkInput, setBulkInput] = useState('');
   const [toast, setToast] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     fetchSites();
@@ -17,9 +18,14 @@ function App() {
       if (res.ok) {
         const data = await res.json();
         setSites(data);
+        setError('');
+      } else {
+        const errorData = await res.json();
+        setError(`Failed to load sites: ${errorData.error || 'Unknown error'}`);
       }
     } catch (err) {
-      console.error('خطا در دریافت داده‌ها:', err);
+      console.error('Error fetching sites:', err);
+      setError(`Connection error: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -30,7 +36,7 @@ function App() {
     const lines = bulkInput.trim().split(/\r?\n/).map(l => l.trim()).filter(Boolean);
     
     if (lines.length < 4) {
-      showToast('باید حداقل ۴ خط وارد کنید');
+      showToast('You must enter at least 4 lines');
       return;
     }
 
@@ -44,20 +50,21 @@ function App() {
       });
 
       if (res.ok) {
-        showToast('سایت اضافه شد');
+        showToast('Site added successfully');
         setBulkInput('');
         fetchSites();
       } else {
-        showToast('خطا در افزودن');
+        const errorData = await res.json();
+        showToast(`Error adding site: ${errorData.error || 'Unknown error'}`);
       }
     } catch (err) {
-      showToast('خطا در اتصال');
+      showToast(`Connection error: ${err.message}`);
       console.error(err);
     }
   };
 
   const handleDelete = async (site) => {
-    if (!window.confirm(`آیا از حذف ${site} اطمینان دارید؟`)) {
+    if (!window.confirm(`Are you sure you want to delete ${site}?`)) {
       return;
     }
 
@@ -67,13 +74,14 @@ function App() {
       });
 
       if (res.ok) {
-        showToast('سایت حذف شد');
+        showToast('Site deleted successfully');
         fetchSites();
       } else {
-        showToast('خطا در حذف');
+        const errorData = await res.json();
+        showToast(`Error deleting site: ${errorData.error || 'Unknown error'}`);
       }
     } catch (err) {
-      showToast('خطا در اتصال');
+      showToast(`Connection error: ${err.message}`);
       console.error(err);
     }
   };
@@ -83,16 +91,16 @@ function App() {
     
     try {
       await navigator.clipboard.writeText(text);
-      showToast(`کپی شد: ${text}`);
+      showToast(`Copied: ${text}`);
     } catch (err) {
-      showToast('خطا در کپی');
+      showToast('Copy failed');
       console.error(err);
     }
   };
 
   const showToast = (msg) => {
     setToast(msg);
-    setTimeout(() => setToast(''), 2000);
+    setTimeout(() => setToast(''), 2500);
   };
 
   const getVal = (site, key) => {
@@ -101,16 +109,22 @@ function App() {
   };
 
   if (loading) {
-    return <div className="loading">در حال بارگذاری...</div>;
+    return <div className="loading">Loading...</div>;
   }
 
   return (
     <div className="container">
-      <h1>مدیریت Selector های گالری</h1>
+      <h1>Gallery Security Selectors Manager</h1>
+
+      {error && (
+        <div className="error-banner">
+          <strong>Error:</strong> {error}
+        </div>
+      )}
 
       <div className="form-section">
         <p className="instruction">
-          برای افزودن سایت جدید، چهار خط زیر را در textarea بنویسید (هر خط یک مقدار):
+          To add a new site, enter 4 lines in the textarea below (one value per line):
         </p>
         <pre className="example">
 site.com
@@ -123,10 +137,10 @@ containerSelector
           <textarea
             value={bulkInput}
             onChange={(e) => setBulkInput(e.target.value)}
-            placeholder="definebabe.com&#10;div.models-items__col&#10;a[href]&#10;div.models-items"
+            placeholder="example.com&#10;div.card&#10;a[href]&#10;div.container"
             rows="6"
           />
-          <button type="submit" className="btn-add">افزودن سایت</button>
+          <button type="submit" className="btn-add">Add Site</button>
         </form>
       </div>
 
@@ -135,7 +149,7 @@ containerSelector
           <table>
             <thead>
               <tr>
-                <th>پارامتر</th>
+                <th>Parameter</th>
                 {sites.map((config) => (
                   <th key={config.site}>
                     <div className="header-cell">
@@ -144,7 +158,7 @@ containerSelector
                         onClick={() => handleDelete(config.site)}
                         className="btn-delete"
                       >
-                        حذف
+                        Delete
                       </button>
                     </div>
                   </th>
@@ -192,7 +206,7 @@ containerSelector
           </table>
         </div>
       ) : (
-        <p className="empty-state">هنوز سایتی اضافه نشده است.</p>
+        <p className="empty-state">No sites added yet.</p>
       )}
 
       {toast && <div className="toast">{toast}</div>}

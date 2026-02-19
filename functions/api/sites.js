@@ -1,4 +1,4 @@
-// GET: لیست تمام سایت‌ها از KV
+// GET: List all sites from KV
 export async function onRequestGet(context) {
   try {
     const list = await context.env.GALLERY_SECURITY_SELECTORS.list();
@@ -22,6 +22,7 @@ export async function onRequestGet(context) {
       },
     });
   } catch (err) {
+    console.error('GET /api/sites error:', err);
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
@@ -29,7 +30,7 @@ export async function onRequestGet(context) {
   }
 }
 
-// POST: افزودن سایت جدید به KV
+// POST: Add new site to KV
 export async function onRequestPost(context) {
   try {
     const body = await context.request.json();
@@ -58,6 +59,7 @@ export async function onRequestPost(context) {
       },
     });
   } catch (err) {
+    console.error('POST /api/sites error:', err);
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
@@ -65,7 +67,7 @@ export async function onRequestPost(context) {
   }
 }
 
-// DELETE: حذف سایت از KV
+// DELETE: Remove site from KV
 export async function onRequestDelete(context) {
   try {
     const url = new URL(context.request.url);
@@ -87,6 +89,7 @@ export async function onRequestDelete(context) {
       },
     });
   } catch (err) {
+    console.error('DELETE /api/sites error:', err);
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
@@ -94,7 +97,7 @@ export async function onRequestDelete(context) {
   }
 }
 
-// OPTIONS: برای CORS
+// OPTIONS: For CORS preflight
 export async function onRequestOptions() {
   return new Response(null, {
     headers: {
