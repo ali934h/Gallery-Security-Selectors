@@ -6,9 +6,12 @@ function App() {
   const [bulkInput, setBulkInput] = useState('');
   const [toast, setToast] = useState('');
   const [error, setError] = useState('');
+  const [apiKey, setApiKey] = useState(null);
+  const [apiKeyLoading, setApiKeyLoading] = useState(false);
 
   useEffect(() => {
     fetchSites();
+    fetchApiKey();
   }, []);
 
   const fetchSites = async () => {
@@ -27,6 +30,47 @@ function App() {
       setError(`Connection error: ${err.message}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchApiKey = async () => {
+    try {
+      const res = await fetch('/api/apikey');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.exists) {
+          setApiKey(data.apiKey);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching API key:', err);
+    }
+  };
+
+  const handleGenerateApiKey = async () => {
+    if (apiKey && !window.confirm('This will replace your existing API Key. Any integrations using the old key will stop working. Continue?')) {
+      return;
+    }
+
+    setApiKeyLoading(true);
+    try {
+      const res = await fetch('/api/apikey', {
+        method: 'POST'
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setApiKey(data.apiKey);
+        showToast(apiKey ? 'API Key regenerated successfully' : 'API Key generated successfully', 'success');
+      } else {
+        const errorData = await res.json();
+        showToast(`Error: ${errorData.error || 'Unknown error'}`, 'error');
+      }
+    } catch (err) {
+      showToast(`Connection error: ${err.message}`, 'error');
+      console.error(err);
+    } finally {
+      setApiKeyLoading(false);
     }
   };
 
@@ -161,6 +205,97 @@ function App() {
             </div>
           </div>
         )}
+
+        {/* API Key Management */}
+        <div className="mb-8 bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-4 sm:p-6 shadow-xl">
+          <div className="flex items-center gap-2 mb-4">
+            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            </svg>
+            <h2 className="text-lg sm:text-xl font-semibold text-slate-200">API Key Management</h2>
+          </div>
+          
+          {apiKey ? (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-slate-400 text-xs sm:text-sm mb-2 font-medium">Your API Key</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={apiKey}
+                    readOnly
+                    className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 font-mono text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  />
+                  <button
+                    onClick={() => copyToClipboard(apiKey)}
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Copy
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-slate-950/50 rounded-lg p-3 sm:p-4 border border-slate-800">
+                <p className="text-slate-400 text-xs sm:text-sm mb-3 font-semibold">Usage Example:</p>
+                <pre className="text-xs text-slate-300 font-mono overflow-x-auto whitespace-pre-wrap break-all">
+{`fetch('${window.location.origin}/public-api/sites', {
+  headers: {
+    'X-API-Key': '${apiKey}'
+  }
+})
+.then(res => res.json())
+.then(data => console.log(data));`}
+                </pre>
+              </div>
+
+              <button
+                onClick={handleGenerateApiKey}
+                disabled={apiKeyLoading}
+                className="w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 bg-amber-600 hover:bg-amber-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-lg hover:shadow-amber-500/50 transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base"
+              >
+                {apiKeyLoading ? (
+                  <>
+                    <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Regenerate API Key
+                  </>
+                )}
+              </button>
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <p className="text-slate-400 text-sm mb-4">No API Key generated yet. Generate one to access your data from external applications.</p>
+              <button
+                onClick={handleGenerateApiKey}
+                disabled={apiKeyLoading}
+                className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 disabled:from-slate-700 disabled:to-slate-700 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-lg hover:shadow-amber-500/50 transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base mx-auto"
+              >
+                {apiKeyLoading ? (
+                  <>
+                    <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    Generate API Key
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Add Site Form */}
         <div className="mb-8 bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-4 sm:p-6 shadow-xl">
