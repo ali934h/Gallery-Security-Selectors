@@ -9,10 +9,11 @@ export async function onRequest(context) {
   const ADMIN_PATH = env.ADMIN_PATH || 'admin';
   const adminPathWithSlash = `/${ADMIN_PATH}`;
 
-  // Allow static assets and API calls to pass through
+  // Allow static assets, API calls, and public API calls to pass through
   if (
     pathname.startsWith('/assets/') ||
     pathname.startsWith('/api/') ||
+    pathname.startsWith('/public-api/') ||
     pathname.includes('.')
   ) {
     return next();
