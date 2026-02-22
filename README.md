@@ -1,4 +1,4 @@
-# Gallery Security Selectors
+# CSS Selector Panel
 
 A modern, secure admin panel for storing and managing CSS selectors for various sites. Built with React, Tailwind CSS, and Cloudflare Pages + Workers KV.
 
@@ -12,25 +12,31 @@ A modern, secure admin panel for storing and managing CSS selectors for various 
 - 🗑️ Easy site deletion with confirmation
 - 📱 Fully responsive design
 - 🎉 Smooth animations and transitions
+- 🔑 API Key management for external access
 
 ## Project Structure
 
 ```
 .
 ├── src/
-│   ├── App.jsx          # Main dashboard component
-│   ├── Login.jsx        # Login page component
-│   ├── main.jsx         # Entry point with auth check
-│   └── index.css        # Tailwind CSS imports
+│   ├── App.jsx              # Main dashboard component
+│   ├── Login.jsx            # Login page component
+│   ├── main.jsx             # Entry point with auth check
+│   └── index.css            # Tailwind CSS imports
 ├── functions/
-│   ├── _middleware.js   # Main middleware for path protection
+│   ├── _middleware.js       # Main middleware for path protection
+│   ├── public-api/
+│   │   └── sites.js         # Public API endpoint (API Key protected)
 │   └── api/
 │       ├── _middleware.js   # API auth middleware
+│       ├── apikey.js        # API Key management endpoints
 │       ├── sites.js         # Sites CRUD endpoints
 │       └── auth/
 │           ├── login.js     # Login endpoint
 │           ├── logout.js    # Logout endpoint
 │           └── check.js     # Auth check endpoint
+├── _headers
+├── _routes.json
 ├── tailwind.config.js
 ├── postcss.config.js
 ├── vite.config.js
@@ -50,8 +56,8 @@ A modern, secure admin panel for storing and managing CSS selectors for various 
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/ali934h/Gallery-Security-Selectors.git
-cd Gallery-Security-Selectors
+git clone https://github.com/ali934h/css-selector-panel.git
+cd css-selector-panel
 ```
 
 2. Install dependencies:
@@ -73,7 +79,7 @@ npm run dev
 1. Go to Cloudflare Dashboard
 2. Navigate to **Workers & Pages**
 3. Click on the **KV** tab
-4. Create a new namespace named `Gallery-Security-Selectors`
+4. Create a new namespace named `CSS-Selector-Panel`
 
 ### Step 2: Connect Repository to Cloudflare Pages
 
@@ -81,7 +87,7 @@ npm run dev
 2. Click **Create application**
 3. Select the **Pages** tab
 4. Click **Connect to Git**
-5. Select the `Gallery-Security-Selectors` repository
+5. Select the `css-selector-panel` repository
 6. Configure build settings as follows:
 
    - **Framework preset**: `Vite`
@@ -170,6 +176,65 @@ https://your-site.pages.dev/my-secret-panel-2024
 - Click the **Logout** button in the top-right corner
 - You'll be redirected to the login page
 
+## Public API
+
+The panel provides a public API endpoint that can be accessed from any external website using an API Key.
+
+### Generate an API Key
+
+1. Log in to the admin panel
+2. In the **API Key Management** section, click **Generate API Key**
+3. Copy the generated key
+
+### API Endpoint
+
+**GET** `/public-api/sites`
+
+Returns all stored sites and their CSS selectors.
+
+**Request Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| `X-API-Key` | ✅ Yes | Your generated API Key |
+
+**Example Usage:**
+
+```javascript
+fetch('https://your-site.pages.dev/public-api/sites', {
+  headers: {
+    'X-API-Key': 'your-api-key-here'
+  }
+})
+.then(res => res.json())
+.then(data => console.log(data));
+```
+
+**Response Format:**
+
+```json
+{
+  "success": true,
+  "count": 2,
+  "sites": [
+    {
+      "site": "example.com",
+      "cardSelector": "div.card",
+      "linkSelector": "a.link",
+      "containerSelector": "div.container"
+    }
+  ]
+}
+```
+
+**Error Responses:**
+
+| Status | Description |
+|--------|-------------|
+| `401` | API Key is missing |
+| `403` | Invalid API Key |
+| `500` | Server error |
+
 ## Data Structure in KV
 
 Each site is stored as a key-value pair in KV:
@@ -203,6 +268,7 @@ Each site is stored as a key-value pair in KV:
 - **HttpOnly Cookies**: Secure session management
 - **Path Middleware**: Automatic 404 for unauthorized paths
 - **API Protection**: All API endpoints require authentication
+- **API Key Authentication**: Public API protected by rotating API Keys
 
 ## Customization
 
@@ -244,6 +310,11 @@ theme: {
 - Confirm KV namespace binding variable name is `GALLERY_SECURITY_SELECTORS`
 - Check the binding is added to the correct environment (Production/Preview)
 - Redeploy after adding the binding
+
+### Public API not working
+- Make sure you have generated an API Key from the admin panel
+- Verify the `X-API-Key` header is included in your request
+- Check that the API Key has not been regenerated
 
 ## License
 
